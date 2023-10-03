@@ -4,7 +4,7 @@
   "description": "",
   "require": {
     "php": "~8.2.7|~8.1.5",
-    "struct/data-type-contracts": "^1.0.3"
+    "struct/contracts": "^1.1.0"
   },
   "autoload": {
     "psr-4": {
