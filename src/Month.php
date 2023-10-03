@@ -73,26 +73,4 @@ final class Month extends AbstractDataType
             throw new DeserializeException('Invalid month: ' . $exception->getMessage(), 1696228168, $exception);
         }
     }
-
-    public function increment(): void
-    {
-        $this->month++;
-        if ($this->month > 12) {
-            $this->month = 1;
-            $this->year++;
-        }
-    }
-
-    public function compare(ComparableInterface $comparable): int
-    {
-        if ($comparable instanceof self === false) {
-            throw new \Exception('sdhfdafgh');
-        }
-
-        if ($this->month === $comparable->month && $this->year === $comparable->year) {
-            return 0;
-        }
-
-        return 9000;
-    }
 }

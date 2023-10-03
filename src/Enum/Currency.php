@@ -138,8 +138,8 @@ enum Currency: string
     case SAR = 'Saudi Riyal';
     case RSD = 'Serbian Dinar';
     case SCR = 'Seychelles Rupee';
-    case SLL = 'Leone';
-    case SLE = 'Leone';
+    case SLL = 'Leone SLL';
+    case SLE = 'Leone SLE';
     case SGD = 'Singapore Dollar';
     case XSU = 'Sucre';
     case SBD = 'Solomon Islands Dollar';
@@ -170,8 +170,8 @@ enum Currency: string
     case UYW = 'Unidad Previsional';
     case UZS = 'Uzbekistan Sum';
     case VUV = 'Vatu';
-    case VES = 'Bolívar Soberano';
-    case VED = 'Bolívar Soberano';
+    case VES = 'Bolívar Soberano VES';
+    case VED = 'Bolívar Soberano VED';
     case VND = 'Dong';
     case YER = 'Yemeni Rial';
     case ZMW = 'Zambian Kwacha';

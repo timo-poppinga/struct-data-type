@@ -6,7 +6,7 @@ namespace Struct\DataType;
 
 use Struct\DataType\Enum\AmountVolume;
 use Struct\DataType\Enum\Currency;
-use Struct\DataType\Exception\DeserializeException;
+use Struct\Exception\Serialize\DeserializeException;
 
 final class Amount extends AbstractDataType
 {
