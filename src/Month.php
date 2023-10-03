@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Struct\DataType;
 
-use Struct\DataType\Exception\DeserializeException;
-use Struct\DataType\Exception\InvalidArgumentException;
+use InvalidArgumentException;
+use Struct\Exception\Serialize\DeserializeException;
 
 final class Month extends AbstractDataType
 {
@@ -13,10 +13,9 @@ final class Month extends AbstractDataType
 
     protected int $month;
 
-
     public function setMonth(int $month): void
     {
-        if($month < 1 || $month > 12) {
+        if ($month < 1 || $month > 12) {
             throw new InvalidArgumentException('The month must be between 1 and 12', 1696052867);
         }
         $this->month = $month;
@@ -24,7 +23,7 @@ final class Month extends AbstractDataType
 
     public function setYear(int $year): void
     {
-        if($year < 1000 || $year > 9999) {
+        if ($year < 1000 || $year > 9999) {
             throw new InvalidArgumentException('The year must be between 1000 and 9999', 1696052931);
         }
         $this->year = $year;
@@ -40,24 +39,23 @@ final class Month extends AbstractDataType
         return $this->month;
     }
 
-
     protected function _serializeToString(): string
     {
         $monthString = (string) $this->month;
-        if(strlen($monthString) === 1) {
+        if (strlen($monthString) === 1) {
             $monthString = '0' . $monthString;
         }
         $serializedData = $this->year . '-' . $monthString;
         return $serializedData;
     }
 
-    protected function _deserializeToString(string $serializedData): void
+    protected function _deserializeFromString(string $serializedData): void
     {
-        if(\strlen($serializedData) !== 7) {
+        if (\strlen($serializedData) !== 7) {
             throw new DeserializeException('The value serialized data string must have 7 characters', 1696227826);
         }
         $parts = \explode('-', $serializedData);
-        if(\count($parts) !== 2) {
+        if (\count($parts) !== 2) {
             throw new DeserializeException('The value serialized data must year und month to parts separate by -', 1696227896);
         }
         $year = (int) $parts[0];
@@ -79,7 +77,7 @@ final class Month extends AbstractDataType
     public function increment(): void
     {
         $this->month++;
-        if($this->month > 12) {
+        if ($this->month > 12) {
             $this->month = 1;
             $this->year++;
         }
@@ -87,17 +85,14 @@ final class Month extends AbstractDataType
 
     public function compare(ComparableInterface $comparable): int
     {
-        if($comparable instanceof Month === false) {
+        if ($comparable instanceof self === false) {
             throw new \Exception('sdhfdafgh');
         }
 
-        if($this->month === $comparable->month && $this->year === $comparable->year) {
+        if ($this->month === $comparable->month && $this->year === $comparable->year) {
             return 0;
         }
 
-
         return 9000;
     }
-
-
 }

@@ -4,21 +4,19 @@ declare(strict_types=1);
 
 namespace Struct\DataType;
 
-use Struct\DataType\Contracts\DataTypeInterface;
-use Struct\DataType\Exception\DeserializeException;
-use Struct\DataType\Exception\InvalidArgumentException;
+use Struct\Contracts\DataType\DataTypeInterface;
 
 abstract class AbstractDataType implements DataTypeInterface
 {
     public function __construct(?string $serializedData = null)
     {
-        if($serializedData === null) {
+        if ($serializedData === null) {
             return;
         }
-        $this->_deserializeToString($serializedData);
+        $this->_deserializeFromString($serializedData);
     }
 
-    protected function _deserializeToString(string $serializedData): void
+    protected function _deserializeFromString(string $serializedData): void
     {
         throw new \RuntimeException('Must be implemented', 1696233161);
     }
@@ -33,12 +31,11 @@ abstract class AbstractDataType implements DataTypeInterface
         return $this->_serializeToString();
     }
 
-
-    public static function deserializeToString(string $serializedData): static
+    public static function deserializeFromString(string $serializedData): static
     {
         $class = static::class;
         $dataType = new $class();
-        $dataType->_deserializeToString($serializedData);
+        $dataType->_deserializeFromString($serializedData);
         return $dataType;
     }
 
