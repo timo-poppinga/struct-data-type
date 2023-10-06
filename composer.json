@@ -1,10 +1,11 @@
 {
   "name": "struct/data-type",
   "license": "MIT",
-  "description": "",
+  "description": "Simple package to provide data types: Amount, Date, Month, Rate",
   "require": {
     "php": "~8.2.7|~8.1.5",
-    "struct/contracts": "^1.1.0"
+    "struct/contracts-data-type": "^1.4.0",
+    "struct/contracts-operator": "^1.4.0"
   },
   "autoload": {
     "psr-4": {
