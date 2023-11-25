@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Struct\DataType;
 
+use DateTime;
 use Exception\Unexpected\UnexpectedException;
 use InvalidArgumentException;
 use Struct\Contracts\Operator\ComparableInterface;
@@ -21,6 +22,16 @@ final class Date extends AbstractDataType implements SerializableToInt, Comparab
     protected int $month;
 
     protected int $day;
+
+    public function __construct(null|string|DateTime $serializedData = null)
+    {
+        if (is_string($serializedData) === true) {
+            parent::__construct($serializedData);
+        }
+        if ($serializedData instanceof DateTime) {
+            $this->deserializeFromDateTime($serializedData);
+        }
+    }
 
     public function setYear(int $year): void
     {
@@ -67,7 +78,7 @@ final class Date extends AbstractDataType implements SerializableToInt, Comparab
         if (isset($this->day) === false) {
             return;
         }
-        $checkDate = new \DateTime($this->year . '-' . $this->month . '-01', new \DateTimeZone('UTC'));
+        $checkDate = new DateTime($this->year . '-' . $this->month . '-01', new \DateTimeZone('UTC'));
         $checkDate->setTime(0, 0);
         $numberOfDays = (int) $checkDate->format('t');
         if ($this->day > $numberOfDays) {
@@ -137,10 +148,10 @@ final class Date extends AbstractDataType implements SerializableToInt, Comparab
         }
     }
 
-    public function toDateTime(): \DateTime
+    public function toDateTime(): DateTime
     {
         try {
-            $dateTime = new \DateTime($this->serializeToString() . ' 00:00:00', new \DateTimeZone('UTC'));
+            $dateTime = new DateTime($this->serializeToString() . ' 00:00:00', new \DateTimeZone('UTC'));
         } catch (\Throwable $exception) {
             throw new UnexpectedException(1700915819, $exception);
         }
@@ -305,5 +316,10 @@ final class Date extends AbstractDataType implements SerializableToInt, Comparab
         $weekdayNumber = $days % 7;
         $weekday =  Weekday::from($weekdayNumber);
         return $weekday;
+    }
+
+    public function deserializeFromDateTime(\DateTime $dateTime): void
+    {
+        $this->_deserializeFromString($dateTime->format('Y-m-d'));
     }
 }
