@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use Struct\Contracts\Operator\ComparableInterface;
 use Struct\Contracts\Operator\IncrementableInterface;
 use Struct\Contracts\Serialize\SerializableToInt;
+use Struct\DataType\Enum\Weekday;
 use Struct\Enum\Operator\Comparison;
 use Struct\Exception\Operator\CompareException;
 use Struct\Exception\Serialize\DeserializeException;
@@ -295,5 +296,14 @@ final class Date extends AbstractDataType implements SerializableToInt, Comparab
     {
         $days = $this->serializeToInt();
         $this->deserializeFromInt(--$days);
+    }
+
+    public function weekday(): Weekday
+    {
+        $days = $this->serializeToInt();
+        $days += 2;
+        $weekdayNumber = $days % 7;
+        $weekday =  Weekday::from($weekdayNumber);
+        return $weekday;
     }
 }
