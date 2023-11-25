@@ -4,10 +4,16 @@ declare(strict_types=1);
 
 namespace Struct\DataType;
 
+use Exception\Unexpected\UnexpectedException;
 use InvalidArgumentException;
+use Struct\Contracts\Operator\ComparableInterface;
+use Struct\Contracts\Operator\IncrementableInterface;
+use Struct\Contracts\Serialize\SerializableToInt;
+use Struct\Enum\Operator\Comparison;
+use Struct\Exception\Operator\CompareException;
 use Struct\Exception\Serialize\DeserializeException;
 
-final class Date extends AbstractDataType
+final class Date extends AbstractDataType implements SerializableToInt, ComparableInterface, IncrementableInterface
 {
     protected int $year;
 
@@ -128,5 +134,166 @@ final class Date extends AbstractDataType
         } catch (InvalidArgumentException $exception) {
             throw new DeserializeException('Invalid day: ' . $exception->getMessage(), 1696334763, $exception);
         }
+    }
+
+    public function toDateTime(): \DateTime
+    {
+        try {
+            $dateTime = new \DateTime($this->serializeToString() . ' 00:00:00', new \DateTimeZone('UTC'));
+        } catch (\Throwable $exception) {
+            throw new UnexpectedException(1700915819, $exception);
+        }
+        return $dateTime;
+    }
+
+    /**
+     * @var array<int>
+     */
+    protected array $daysPerMonth = [31, 28, 31 , 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+    public function serializeToInt(): int
+    {
+        $isLeapYear = self::isLeapYear($this->year);
+        $month = $this->month - 1;
+        $day = $this->day - 1;
+
+        $days = self::calculateDaysByYear($this->year);
+
+        for ($index = 0; $index < $month; $index++) {
+            $days += $this->daysPerMonth[$index];
+            if ($index === 1 && $isLeapYear === true) {
+                $days++;
+            }
+        }
+        $days += $day;
+        return $days;
+    }
+
+    public function deserializeFromInt(int $serializedData): void
+    {
+        if ($serializedData < 0 || $serializedData > 3287181) {
+            throw new DeserializeException('The value of serialized data string must be between 0 and 3287181', 1700914014);
+        }
+        $days = $serializedData;
+        $remainingDays = 0;
+        $this->year = self::calculateYearByDays($days, $remainingDays);
+        $isLeapYear = self::isLeapYear($this->year);
+        $moth = 0;
+        foreach ($this->daysPerMonth as $daysPerMonth) {
+            if ($moth === 1 && $isLeapYear === true) {
+                $daysPerMonth++;
+            }
+            if ($daysPerMonth > $remainingDays) {
+                break;
+            }
+            $moth++;
+            $remainingDays -= $daysPerMonth;
+        }
+        $this->month = $moth + 1;
+        $this->day = $remainingDays + 1;
+    }
+
+    protected static int $dayShift = 364877;
+
+    /**
+     * @var array<int, int>
+     */
+    protected static array $daysForYearSpan = [
+        400 => 146097,  // [100] * 4   + 1;
+        100 => 36524,   // [4]   * 25  - 1;
+        4   => 1461,    // [1]   * 4   + 1;
+        1    => 365,
+    ];
+
+    public static function calculateDaysByYear(int $year): int
+    {
+        $year--;
+        $days = 0;
+        foreach (self::$daysForYearSpan as $left => $right) {
+            $fraction = (int) floor($year / $left);
+            $year -= $fraction * $left;
+            $days += $fraction * $right;
+        }
+        $days -= self::$dayShift;
+        return $days;
+    }
+
+    public static function calculateYearByDays(int $days, int &$remainingDays = 0): int
+    {
+        $year = 0;
+        $days += self::$dayShift;
+        foreach (self::$daysForYearSpan as $left => $right) {
+            if ($days === 0) {
+                break;
+            }
+            if ($days === 146096) {
+                $year += 399;
+                $days = 365;
+                break;
+            }
+            if ($days === 1460) {
+                $year += 3;
+                $days = 365;
+                break;
+            }
+            $fraction = (int) floor($days / $right);
+            $days -= $fraction * $right;
+            $year += $fraction * $left;
+        }
+        $year++;
+        $remainingDays = $days;
+        return $year;
+    }
+
+    public static function isLeapYear(int $year): bool
+    {
+        if ($year % 400 === 0) {
+            return true;
+        }
+        if ($year % 100 === 0) {
+            return false;
+        }
+        if ($year % 4 === 0) {
+            return true;
+        }
+        return false;
+    }
+
+    public function compare(ComparableInterface $compareWith): Comparison
+    {
+        if ($compareWith instanceof self === false) {
+            throw new CompareException('Date can only compare with date', 1700916002);
+        }
+        if ($this->year < $compareWith->year) {
+            return Comparison::lessThan;
+        }
+        if ($this->year > $compareWith->year) {
+            return Comparison::greaterThan;
+        }
+        if ($this->month < $compareWith->month) {
+            return Comparison::lessThan;
+        }
+        if ($this->month > $compareWith->month) {
+            return Comparison::greaterThan;
+        }
+        if ($this->day < $compareWith->day) {
+            return Comparison::lessThan;
+        }
+        if ($this->day > $compareWith->day) {
+            return Comparison::greaterThan;
+        }
+        return Comparison::equal;
+    }
+
+    public function increment(): void
+    {
+        $days = $this->serializeToInt();
+        $this->deserializeFromInt(++$days);
+    }
+
+    public function decrement(): void
+    {
+        $days = $this->serializeToInt();
+        $this->deserializeFromInt(--$days);
     }
 }
