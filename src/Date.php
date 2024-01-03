@@ -311,15 +311,69 @@ final class Date extends AbstractDataType implements SerializableToInt, Comparab
 
     public function weekday(): Weekday
     {
+        $weekdayNumber = $this->weekdayNumber();
+        $weekday =  Weekday::from($weekdayNumber);
+        return $weekday;
+    }
+
+    public function weekdayNumber(): int
+    {
         $days = $this->serializeToInt();
         $days += 2;
         $weekdayNumber = $days % 7;
-        $weekday =  Weekday::from($weekdayNumber);
-        return $weekday;
+        return $weekdayNumber;
+    }
+
+    public function calendarWeek(): int
+    {
+        $firstDayOfTheYear = $this->firstDayOfTheYear();
+        $numberOfDayInYear = $this->serializeToInt() - $firstDayOfTheYear->serializeToInt() + $firstDayOfTheYear->weekdayNumber();
+        $calendarWeek = (int) ($numberOfDayInYear / 7);
+        if ($firstDayOfTheYear->weekdayNumber() < 4) {
+            $calendarWeek++;
+        }
+        if ($calendarWeek === 0) {
+            $lastDayInPreviousYear = $this->lastDayInPreviousYear();
+            return $lastDayInPreviousYear->calendarWeek();
+        }
+
+        if ($calendarWeek === 53) {
+            $lastDayOfTheYear = $this->lastDayOfTheYear();
+            if ($lastDayOfTheYear->weekdayNumber() < 3) {
+                $calendarWeek = 1;
+            }
+        }
+
+        return $calendarWeek;
     }
 
     public function deserializeFromDateTime(\DateTime $dateTime): void
     {
         $this->_deserializeFromString($dateTime->format('Y-m-d'));
+    }
+
+    public function firstDayOfTheYear(): self
+    {
+        $firstDayOfTheYear = new self();
+        $firstDayOfTheYear->day = 1;
+        $firstDayOfTheYear->month = 1;
+        $firstDayOfTheYear->year = $this->year;
+        return $firstDayOfTheYear;
+    }
+
+    public function lastDayOfTheYear(): self
+    {
+        $lastDayOfTheYear = new self();
+        $lastDayOfTheYear->day = 31;
+        $lastDayOfTheYear->month = 12;
+        $lastDayOfTheYear->year = $this->year;
+        return $lastDayOfTheYear;
+    }
+
+    public function lastDayInPreviousYear(): self
+    {
+        $lastDayInPreviousYear = $this->lastDayOfTheYear();
+        $lastDayInPreviousYear->year--;
+        return $lastDayInPreviousYear;
     }
 }
